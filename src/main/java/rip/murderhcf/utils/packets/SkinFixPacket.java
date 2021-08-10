@@ -15,8 +15,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.collect.Maps;
 import com.google.common.io.CharStreams;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
+import net.minecraft.util.com.mojang.authlib.GameProfile;
+import net.minecraft.util.com.mojang.authlib.properties.Property;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -110,11 +110,11 @@ public class SkinFixPacket {
 
     private void updateSkin(WrappedGameProfile profile, String skinOwner) {
         try {
-            JSONObject json = (JSONObject) new JSONParser().parse(profileCache.get(skinOwner, () -> null));
+            JSONObject json = (JSONObject) new JSONParser().parse(profileCache.get(skinOwner));
             JSONArray properties = (JSONArray) json.get("properties");
 
-            for (int i = 0; i < properties.size(); i++) {
-                JSONObject property = (JSONObject) properties.get(i);
+            for (Object o : properties) {
+                JSONObject property = (JSONObject) o;
                 String name = (String) property.get("name");
                 String value = (String) property.get("value");
                 String signature = (String) property.get("signature"); // May be NULL

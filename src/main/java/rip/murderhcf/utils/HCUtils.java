@@ -2,6 +2,7 @@ package rip.murderhcf.utils;
 
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import rip.murderhcf.utils.packets.SkinFixPacket;
@@ -23,8 +24,10 @@ public class HCUtils extends JavaPlugin {
         new BukkitRunnable() {
             @Override
             public void run() {
-                Bukkit.getOnlinePlayers().forEach(skinFixPacket::removeChanges);
+                for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+                    skinFixPacket.removeChanges(player);
+                }
             }
-        }.runTaskTimerAsynchronously(this, 60L, 60L);
+        }.runTaskTimer(this, 60L, 60L);
     }
 }
