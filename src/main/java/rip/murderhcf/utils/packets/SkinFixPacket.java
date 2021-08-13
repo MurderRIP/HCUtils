@@ -8,6 +8,7 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.cache.Cache;
@@ -23,6 +24,7 @@ import org.bukkit.plugin.Plugin;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import rip.murderhcf.utils.HCUtils;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -70,6 +72,7 @@ public class SkinFixPacket {
                     // This will be executed on an asynchronous thread
                     @Override
                     public void onPacketSending(PacketEvent event) {
+
                         // We only care about the entity spawn packet
                         if (event.getPacketType() != PacketType.Play.Server.NAMED_ENTITY_SPAWN) {
                             return;
@@ -79,9 +82,8 @@ public class SkinFixPacket {
                         String skinName = skinNames.get(toDisplay.getName());
                         String displayName = displayNames.get(toDisplay.getName());
 
-                        if (skinName == null && displayName == null) {
-                            return;
-                        }
+                        if (skinName == null && displayName == null) return;
+
                         StructureModifier<WrappedGameProfile> profiles = event.getPacket().getGameProfiles();
                         WrappedGameProfile original = profiles.read(0);
                         WrappedGameProfile result = new WrappedGameProfile(
@@ -95,7 +97,6 @@ public class SkinFixPacket {
                 }).start(WORKER_THREADS);
     }
 
-    @SuppressWarnings("deprecation")
     private UUID extractUUID(final String playerName) {
         return Bukkit.getOfflinePlayer(playerName).getUniqueId();
     }
@@ -104,7 +105,6 @@ public class SkinFixPacket {
     private String getProfileJson(String name) throws IOException {
         final URL url = new URL(PROFILE_URL + extractUUID(name).toString().replace("-", ""));
         final URLConnection uc = url.openConnection();
-
         return CharStreams.toString(() -> new InputStreamReader(uc.getInputStream(), Charsets.UTF_8));
     }
 
@@ -117,11 +117,12 @@ public class SkinFixPacket {
                 JSONObject property = (JSONObject) o;
                 String name = (String) property.get("name");
                 String value = (String) property.get("value");
-                String signature = (String) property.get("signature"); // May be NULL
+                String signature = (String) property.get("signature");
 
-                // Uncomment for ProtocolLib 3.4.0
-                //profile.getProperties().put(name, new WrappedSignedProperty(name, value, signature));
-                ((GameProfile) profile.getHandle()).getProperties().put(name, new Property(name, value, signature));
+                if (HCUtils.getHcUtils().getServer().getPluginManager().getPlugin("ProtocolLib").getDescription().getVersion().equals("4.3.0")) {
+                    profile.getProperties().put(name, new WrappedSignedProperty(name, value, signature));
+                } else
+                    ((GameProfile) profile.getHandle()).getProperties().put(name, new Property(name, value, signature));
             }
         } catch (Exception e) {
             // ProtocolLib will throttle the number of exceptions printed to the console log
@@ -134,17 +135,13 @@ public class SkinFixPacket {
     }
 
     public void changeDisplay(Player player, String toSkin, String toName) {
-        if (updateMap(skinNames, player.getName(), toSkin) |
-                updateMap(displayNames, player.getName(), toName)) {
+        if (updateMap(skinNames, player.getName(), toSkin) | updateMap(displayNames, player.getName(), toName))
             refreshPlayer(player);
-        }
     }
 
     public void changeDisplay(String playerName, String toSkin, String toName) {
-        if (updateMap(skinNames, playerName, toSkin) |
-                updateMap(displayNames, playerName, toName)) {
+        if (updateMap(skinNames, playerName, toSkin) | updateMap(displayNames, playerName, toName))
             refreshPlayer(playerName);
-        }
     }
 
     public void removeChanges(Player player) {
@@ -155,27 +152,14 @@ public class SkinFixPacket {
         changeDisplay(playerName, null, null);
     }
 
-    /**
-     * Update the map with the new key-value pair.
-     *
-     * @param map   - the map.
-     * @param key   - the key of the pair.
-     * @param value - the new value, or NULL to remove the pair.
-     * @return TRUE if the map was updated, FALSE otherwise.
-     */
     private <T, U> boolean updateMap(Map<T, U> map, T key, U value) {
-        if (value == null) {
-            return map.remove(key) != null;
-        } else {
-            return !Objects.equal(value, map.put(key, value));
-        }
+        if (value == null) return map.remove(key) != null;
+        else return !Objects.equal(value, map.put(key, value));
     }
 
     private void refreshPlayer(String name) {
         Player player = Bukkit.getPlayer(name);
-        if (player != null) {
-            refreshPlayer(player);
-        }
+        if (player != null) refreshPlayer(player);
     }
 
     private void refreshPlayer(Player player) {
