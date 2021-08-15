@@ -10,12 +10,12 @@ import org.bukkit.event.HandlerList;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class PlayerOppedEvent extends Event implements Cancellable {
+public class PlayerDeoppedEvent extends Event implements Cancellable {
 
     private static HandlerList handlers = new HandlerList();
     private boolean cancelled;
     @NonNull
-    private Player playerOpped, staffWhoOpped;
+    private Player playerDeopped, staffWhoDeopped;
 
     public static HandlerList getHandlerList() {
         return handlers;
