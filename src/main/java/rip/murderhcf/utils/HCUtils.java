@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import rip.murderhcf.utils.listeners.CommandListener;
 import rip.murderhcf.utils.packets.SkinFixPacket;
 
 @Getter
@@ -29,5 +30,7 @@ public class HCUtils extends JavaPlugin {
                 }
             }
         }.runTaskTimer(this, 60L, 60L);
+
+        getServer().getPluginManager().registerEvents(new CommandListener(), this);
     }
 }
