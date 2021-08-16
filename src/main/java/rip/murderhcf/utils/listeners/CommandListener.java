@@ -31,10 +31,10 @@ public class CommandListener implements Listener {
         String[] args = event.getMessage().split(" ");
         if (args.length >= 1) {
             if (OPTypes.stream().anyMatch(s -> event.getMessage().contains(s)) && !event.isCancelled())
-                Bukkit.getPluginManager().callEvent(new PlayerOppedEvent(Bukkit.getOfflinePlayer(args[1]).getPlayer(), event.getPlayer()));
+                Bukkit.getPluginManager().callEvent(new PlayerOppedEvent(Bukkit.getOfflinePlayer(args[1]), event.getPlayer()));
 
             if (DEOPTypes.stream().anyMatch(s -> event.getMessage().contains(s)) && !event.isCancelled())
-                Bukkit.getPluginManager().callEvent(new PlayerDeoppedEvent(Bukkit.getOfflinePlayer(args[1]).getPlayer(), event.getPlayer()));
+                Bukkit.getPluginManager().callEvent(new PlayerDeoppedEvent(Bukkit.getOfflinePlayer(args[1]), event.getPlayer()));
         }
     }
 }
