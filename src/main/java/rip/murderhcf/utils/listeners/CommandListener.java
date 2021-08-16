@@ -29,7 +29,7 @@ public class CommandListener implements Listener {
     @EventHandler
     public void onOPCommand(PlayerCommandPreprocessEvent event) {
         String[] args = event.getMessage().split(" ");
-        if (args.length >= 1) {
+        if (args.length >= 2) {
             if (OPTypes.stream().anyMatch(s -> event.getMessage().contains(s)) && !event.isCancelled())
                 Bukkit.getPluginManager().callEvent(new PlayerOppedEvent(Bukkit.getOfflinePlayer(args[1]), event.getPlayer()));
 
